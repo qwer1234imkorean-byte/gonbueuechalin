@@ -114,15 +114,15 @@
         #fileStatusArea { margin-top: 10px; font-size: 13px; color: #555; font-weight: bold; }
         .no-posts { text-align: center; padding: 50px 0; color: #777; }
 
-        /* 모바일 상단 바 깨짐 수정 및 레이아웃 최적화 */
+        /* 모바일 네이버 브라우저 레이아웃 깨짐 패치 완료 */
         @media (max-width: 600px) {
-            .navbar { height: auto; flex-direction: column; align-items: center; padding: 10px 15px; gap: 8px; }
+            .navbar { height: auto; flex-direction: column; align-items: center; padding: 12px 15px; gap: 8px; position: absolute; }
             .navbar .logo { font-size: 18px; }
-            .nav-right { width: 100%; justify-content: center; gap: 6px; }
-            .user-info { font-size: 12px; margin-right: 4px; }
-            .btn { padding: 6px 12px; font-size: 12px; border-radius: 15px; }
-            .main-container { margin-top: 140px; }
-            .post-title { font-size: 17px; padding-right: 0; margin-top: 25px; }
+            .nav-right { width: 100%; justify-content: center; gap: 6px; flex-wrap: nowrap; }
+            .user-info { font-size: 12px; margin-right: 2px; }
+            .btn { padding: 6px 12px; font-size: 11px; border-radius: 15px; }
+            .main-container { margin-top: 135px; }
+            .post-title { font-size: 17px; padding-right: 0; margin-top: 20px; }
             .post-controls { top: 10px; right: 10px; }
         }
     </style>
@@ -248,7 +248,7 @@
         if (currentUser) {
             const isAdmin = currentUser.email === 'hak123@gmail.com';
             authArea.innerHTML = `
-                <span class="user-info">${isAdmin ? '👑 원장선생님' : '👤 ' + currentUser.email}</span>
+                <span class="user-info">${isAdmin ? '👑 원장쌤' : '👤 ' + currentUser.email.split('@')[0]}</span>
                 <button class="btn btn-green" onclick="openWriteModal()">+ 글쓰기</button>
                 <button class="btn btn-gray" onclick="handleLogout()">로그아웃</button>
             `;
@@ -270,9 +270,14 @@
             selectedFile = null;
             uploadedFileUrl = "";
             uploadedFileType = "";
-            document.getElementById('submitBtn').disabled = false;
-            document.getElementById('submitBtn').textContent = "발행하기";
+            resetSubmitButton();
         }
+    }
+
+    function resetSubmitButton() {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = false;
+        submitBtn.textContent = "발행하기";
     }
 
     function openWriteModal() {
@@ -329,7 +334,7 @@
 
         if (!file) return;
 
-        const maxSize = 180 * 1024 * 1024; // 180MB 제한
+        const maxSize = 180 * 1024 * 1024; 
         if (file.size > maxSize) {
             alert("파일 용량이 180MB를 초과했습니다. 더 작은 파일을 선택해주세요!");
             document.getElementById('fileInput').value = "";
@@ -350,7 +355,6 @@
         statusArea.innerHTML = `📂 선택된 파일: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB) - 업로드 준비 완료`;
     }
 
-    // 외부 무료 고속 파일 서버 시스템 연동 (무료 요금제 한계 극복)
     function handleSavePost(event) {
         event.preventDefault();
         const title = document.getElementById('title').value;
@@ -360,31 +364,31 @@
 
         if (selectedFile) {
             submitBtn.disabled = true;
-            submitBtn.textContent = "🔄 고속 서버 파일 업로드 중 (최대 1분 소요)...";
+            submitBtn.textContent = "🔄 파일 업로드 및 데이터 확인 중...";
 
             const formData = new FormData();
             formData.append('file', selectedFile);
 
-            // 무료 대용량 임시 파일 스토리지 API 활용
             fetch('https://tmpfiles.org/api/v1/upload', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if(!response.ok) throw new Error("서버 응답 에러");
+                return response.json();
+            })
             .then(data => {
                 if(data && data.data && data.data.url) {
-                    // 다운로드 가능한 다이렉트 주소로 포맷 변환
                     let rawUrl = data.data.url;
                     let directUrl = rawUrl.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
                     saveToDatabase(editId, title, content, directUrl, uploadedFileType);
                 } else {
-                    throw new Error('업로드 실패');
+                    throw new Error('주소 생성 실패');
                 }
             })
             .catch(err => {
-                alert("파일 업로드 서버 통신에 실패했습니다. 다시 시도해 주세요.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = "발행하기";
+                alert("업로드 실패! 파이어베이스 규칙(Rules) 에러가 해결되었는지 먼저 확인해 주세요.");
+                resetSubmitButton();
             });
         } else {
             saveToDatabase(editId, title, content, uploadedFileUrl, uploadedFileType);
@@ -392,10 +396,17 @@
     }
 
     function saveToDatabase(editId, title, content, mediaUrl, mediaType) {
+        const submitBtn = document.getElementById('submitBtn');
+        
         if (editId) {
             let updates = { title: title, content: content, mediaData: mediaUrl, mediaType: mediaType };
             database.ref('academyPosts/' + editId).update(updates, function(error) {
-                if(!error) closeModal('writeModal');
+                if(error) {
+                    alert("데이터베이스 저장 실패: " + error.message + "\n규칙(Rules) 설정을 다시 확인해 주세요.");
+                    resetSubmitButton();
+                } else {
+                    closeModal('writeModal');
+                }
             });
         } else {
             const postId = Date.now();
@@ -412,7 +423,12 @@
                 comments: []
             };
             database.ref('academyPosts/' + postId).set(newPost, function(error) {
-                if(!error) closeModal('writeModal');
+                if(error) {
+                    alert("데이터베이스 저장 실패: " + error.message + "\n규칙(Rules) 설정을 다시 확인해 주세요.");
+                    resetSubmitButton();
+                } else {
+                    closeModal('writeModal');
+                }
             });
         }
     }
@@ -565,7 +581,7 @@
 
                 commentsHtml += `
                     <div class="comment-item ${c.pinned ? 'comment-pinned' : ''}">
-                        <span><strong>${c.writer === 'hak123@gmail.com' ? '👑원장쌤' : c.writer}</strong>: ${c.text}</span>
+                        <span><strong>${c.writer === 'hak123@gmail.com' ? '👑원장쌤' : c.writer.split('@')[0]}</strong>: ${c.text}</span>
                         <div class="comment-right-controls">
                             <span style="color:#aaa; font-size:11px;">${c.date}</span>
                             ${pinBtnHtml}
@@ -579,7 +595,7 @@
                 ${post.pinned ? '<span class="pinned-badge">공지사항</span>' : ''}
                 ${controlsHtml}
                 <div class="post-title">${post.title}</div>
-                <div class="post-meta">작성자: ${post.writer === 'hak123@gmail.com' ? '👑원장선생님' : post.writer} | ${post.date}</div>
+                <div class="post-meta">작성자: ${post.writer === 'hak123@gmail.com' ? '👑원장선생님' : post.writer.split('@')[0]} | ${post.date}</div>
                 <div class="post-content">${post.content}</div>
                 ${mediaHtml}
                 
