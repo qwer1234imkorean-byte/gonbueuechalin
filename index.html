@@ -11,14 +11,13 @@
             margin: 0; padding: 0; color: #333;
         }
 
-        /* 📱 상단 네비게이션 바 (모바일 대응을 위해 flex-wrap 추가 및 height 제거) */
+        /* 🟢 PC용 기본 상단 네비게이션 바 스타일 */
         .navbar {
             background-color: #ffffff;
             border-bottom: 1px solid #e2e6ed;
-            position: fixed; top: 0; width: 100%; min-height: 60px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 65px;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 20px; box-sizing: border-box; z-index: 100;
-            flex-wrap: wrap; gap: 10px;
+            padding: 0 20px; box-sizing: border-box; z-index: 100;
         }
 
         .navbar .logo {
@@ -26,9 +25,8 @@
             white-space: nowrap;
         }
 
-        /* 우측 버튼 영역도 모바일에서 줄바꿈이 부드럽게 되도록 설정 */
         .nav-right {
-            display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+            display: flex; gap: 10px; align-items: center;
         }
 
         .user-info {
@@ -36,9 +34,9 @@
         }
 
         .btn {
-            border: none; padding: 8px 14px; font-size: 13px; font-weight: bold;
+            border: none; padding: 8px 16px; font-size: 14px; font-weight: bold;
             border-radius: 20px; cursor: pointer; transition: background 0.2s;
-            white-space: nowrap;
+            white-space: nowrap; display: inline-block;
         }
 
         .btn-green { background-color: #03cf5d; color: white; }
@@ -46,9 +44,9 @@
         .btn-gray { background-color: #e2e6ed; color: #333; }
         .btn-gray:hover { background-color: #d1d5db; }
 
-        /* 메인 컨테이너 (상단 바 높이가 유연하므로 padding-top을 늘림) */
+        /* 🟢 메인 컨테이너 (PC 기본 상단 여백) */
         .main-container {
-            max-width: 700px; margin: 95px auto 40px auto; padding: 0 15px; box-sizing: border-box;
+            max-width: 700px; margin: 90px auto 40px auto; padding: 0 15px; box-sizing: border-box;
         }
 
         /* 고정된 글 상단 표시용 */
@@ -63,10 +61,9 @@
             background: #ffffff; border: 1px solid #e2e6ed; border-radius: 8px;
             padding: 20px; margin-bottom: 20px; position: relative;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            word-break: break-all; /* 텍스트가 카드 밖으로 나가는 것 방지 */
+            word-break: break-all;
         }
 
-        /* 고정된 게시글은 테두리 강조 */
         .post-card.pinned {
             border: 2px solid #ff4d4f; background-color: #fffbfe;
         }
@@ -80,7 +77,7 @@
             border-radius: 6px; border: 1px solid #eee; margin-top: 15px;
         }
 
-        /* 관리자/작성자 제어 버튼들 (모바일에서 겹치지 않게 위치 미세 조정) */
+        /* 제어 버튼들 */
         .post-controls {
             position: absolute; top: 15px; right: 15px; display: flex; gap: 8px;
         }
@@ -139,18 +136,57 @@
         #imagePreview img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; margin-top: 10px; }
         .no-posts { text-align: center; padding: 50px 0; color: #777; }
 
-        /* 📱 스마트폰 전용 초소형 화면 최적화 스타일 추가 */
-        @media (max-width: 480px) {
-            .navbar { padding: 10px 15px; }
-            .navbar .logo { font-size: 18px; }
-            .user-info { font-size: 12px; }
-            .btn { padding: 6px 12px; font-size: 12px; }
-            .main-container { margin-top: 110px; } /* 줄바꿈 시 본문이 가려지지 않게 여백 추가 */
-            .post-title { font-size: 17px; padding-right: 0; margin-top: 25px; } /* 관리 버튼과 안 겹치게 */
-            .post-controls { top: 10px; right: 10px; }
+        /* 📱 스마트폰 모바일 화면 완벽 조절 (미디어 쿼리) */
+        @media (max-width: 600px) {
+            .navbar {
+                height: auto; /* 고정 높이 해제 */
+                flex-direction: column; /* 세로로 배치하여 겹침 차단 */
+                align-items: center;
+                padding: 12px 15px;
+                gap: 8px;
+            }
+            
+            .navbar .logo {
+                font-size: 18px;
+                margin-bottom: 2px;
+            }
+
+            .nav-right {
+                width: 100%;
+                justify-content: center; /* 버튼들을 가운대로 정렬 */
+                gap: 6px;
+            }
+
+            .user-info {
+                font-size: 12px;
+                margin-right: 4px;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 12px; /* 글자 크기를 살짝 줄여 공간 확보 */
+                border-radius: 15px;
+            }
+
+            /* 상단 바가 세로로 늘어난 만큼 본문 카드를 아래로 넉넉하게 밀어줌 */
+            .main-container {
+                margin-top: 120px; 
+            }
+
+            .post-title {
+                font-size: 17px;
+                padding-right: 0;
+                margin-top: 25px; /* 본문 타이틀이 상단 고정/수정 버튼에 가려지지 않게 여백 확보 */
+            }
+
+            .post-controls {
+                top: 12px;
+                right: 12px;
+            }
         }
     </style>
 
+    <!-- 🌐 구글 파이어베이스 라이브러리 추가 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -163,6 +199,7 @@
 
 <div class="main-container" id="postContainer"></div>
 
+<!-- 회원가입 모달 -->
 <div class="modal-overlay" id="joinModal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeModal('joinModal')">&times;</button>
@@ -181,6 +218,7 @@
     </div>
 </div>
 
+<!-- 로그인 모달 -->
 <div class="modal-overlay" id="loginModal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
@@ -199,6 +237,7 @@
     </div>
 </div>
 
+<!-- 글쓰기 모달 -->
 <div class="modal-overlay" id="writeModal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeModal('writeModal')">&times;</button>
@@ -228,7 +267,6 @@
 </div>
 
 <script>
-    // 🟢 파이어베이스 인증키 정보
     const firebaseConfig = {
         apiKey: "AIzaSyBxFacPLg8J-7y6k87RI7i9IEcD7DO7WH4",
         authDomain: "gonbueuechalin.firebaseapp.com",
@@ -239,11 +277,9 @@
         measurementId: "G-H16JSEPYNJ"
     };
     
-    // 파이어베이스 시작하기
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // 상태 관리 변수
     let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
     let uploadedImageBase64 = "";
 
@@ -251,7 +287,6 @@
         initAdminAccount();
         updateNavbar();
         
-        // 파이어베이스 실시간 데이터 동기화
         database.ref('academyPosts').on('value', function(snapshot) {
             const data = snapshot.val();
             let postsArray = [];
@@ -263,7 +298,6 @@
         });
     };
 
-    // 관리자 계정 체크 및 생성 함수
     function initAdminAccount() {
         database.ref('academyUsers').once('value', function(snapshot) {
             let users = snapshot.val();
@@ -274,7 +308,6 @@
         });
     }
 
-    // 네비게이션바 업데이트
     function updateNavbar() {
         const authArea = document.getElementById('navAuthArea');
         if (currentUser) {
@@ -312,7 +345,6 @@
         openModal('writeModal');
     }
 
-    // 회원가입
     function handleJoin(event) {
         event.preventDefault();
         const email = document.getElementById('joinEmail').value;
@@ -321,11 +353,7 @@
         database.ref('academyUsers').once('value', function(snapshot) {
             let users = snapshot.val() || {};
             const isExist = Object.values(users).some(u => u.email === email);
-            
-            if (isExist) {
-                alert("이미 존재하는 아이디입니다.");
-                return;
-            }
+            if (isExist) { alert("이미 존재하는 아이디입니다."); return; }
 
             const newUserRef = database.ref('academyUsers').push();
             newUserRef.set({ email: email, pw: pw }, function(error) {
@@ -337,7 +365,6 @@
         });
     }
 
-    // 로그인
     function handleLogin(event) {
         event.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -359,7 +386,6 @@
         });
     }
 
-    // 로그아웃
     function handleLogout() {
         currentUser = null;
         sessionStorage.removeItem('currentUser');
@@ -367,7 +393,6 @@
         updateNavbar();
     }
 
-    // 이미지 프리뷰
     function previewImages() {
         const preview = document.getElementById('imagePreview');
         const file = document.getElementById('imageInput').files[0];
@@ -391,7 +416,6 @@
         }
     }
 
-    // 글 저장 및 수정
     function handleSavePost(event) {
         event.preventDefault();
         const title = document.getElementById('title').value;
@@ -423,7 +447,6 @@
         }
     }
 
-    // 글 수정 폼 채우기
     function editPost(id) {
         database.ref('academyPosts/' + id).once('value', function(snapshot) {
             const post = snapshot.val();
@@ -434,42 +457,33 @@
             document.getElementById('title').value = post.title;
             document.getElementById('content').value = post.content;
             document.getElementById('charCounter').textContent = post.content.length + ' / 2000자';
-            
             if (post.image) {
-                const preview = document.getElementById('imagePreview');
-                preview.innerHTML = `<img src="${post.image}">`;
+                document.getElementById('imagePreview').innerHTML = `<img src="${post.image}">`;
             }
             openModal('writeModal');
         });
     }
 
-    // 글 삭제
     function deletePost(id) {
         if(confirm("정말로 이 글을 삭제하시겠습니까?")) {
             database.ref('academyPosts/' + id).remove();
         }
     }
 
-    // 공지 고정 토글
     function togglePin(id) {
         database.ref('academyPosts/' + id).once('value', function(snapshot) {
             const post = snapshot.val();
-            if(post) {
-                database.ref('academyPosts/' + id).update({ pinned: !post.pinned });
-            }
+            if(post) { database.ref('academyPosts/' + id).update({ pinned: !post.pinned }); }
         });
     }
 
-    // 좋아요 토글
     function toggleLike(id) {
         if (!currentUser) { alert("로그인이 필요합니다."); return; }
-        
         database.ref('academyPosts/' + id).once('value', function(snapshot) {
             const post = snapshot.val();
             if (post) {
                 let likes = post.likes || [];
                 const index = likes.indexOf(currentUser.email);
-                
                 if (index > -1) { likes.splice(index, 1); } 
                 else { likes.push(currentUser.email); }
                 database.ref('academyPosts/' + id).update({ likes: likes });
@@ -477,11 +491,9 @@
         });
     }
 
-    // 댓글 추가
     function addComment(event, postId) {
         event.preventDefault();
         if (!currentUser) { alert("로그인이 필요합니다."); return; }
-        
         const input = document.getElementById(`commentInput-${postId}`);
         if (!input.value.trim()) return;
 
@@ -500,7 +512,6 @@
         });
     }
 
-    // 화면 포스트 출력
     function displayPosts(posts) {
         const container = document.getElementById('postContainer');
         container.innerHTML = '';
@@ -527,7 +538,7 @@
             if (isMyPost || isAdmin) {
                 controlsHtml = `
                     <div class="post-controls">
-                        <button class="control-sub-btn" onclick="togglePin(${post.id})">${post.pinned ? '📌 고정' : '📌 고정'}</button>
+                        <button class="control-sub-btn" onclick="togglePin(${post.id})">${post.pinned ? '📌 해제' : '📌 고정'}</button>
                         <button class="control-sub-btn" onclick="editPost(${post.id})">수정</button>
                         <button class="control-sub-btn" onclick="deletePost(${post.id})">삭제</button>
                     </div>
