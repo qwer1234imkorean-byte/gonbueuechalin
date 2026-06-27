@@ -58,11 +58,11 @@
         .post-meta { font-size: 12px; color: #999; margin-bottom: 15px; }
         .post-content { font-size: 15px; line-height: 1.6; white-space: pre-wrap; color: #444; }
         
-        /* 미디어 출력 스타일 */
-        .post-media { margin-top: 15px; }
+        /* 미디어 레이아웃 최적화 */
+        .post-media { margin-top: 15px; text-align: center; }
         .post-media img, .post-media video {
-            width: 100%; max-height: 400px; object-fit: contain;
-            border-radius: 6px; border: 1px solid #eee; background: #000;
+            width: 100%; max-height: 450px; object-fit: contain;
+            border-radius: 6px; border: 1px solid #eee; background: #222;
         }
         .post-media audio { width: 100%; margin-top: 5px; }
 
@@ -80,18 +80,14 @@
         }
         .action-item.liked { color: #ff4d4f; font-weight: bold; }
 
-        /* 댓글 구역 */
+        /* 댓글 스타일 */
         .comment-section { margin-top: 15px; background: #fafafa; padding: 12px; border-radius: 6px; }
-        
         .comment-item {
             font-size: 13px; margin-bottom: 8px; padding: 6px 8px;
             border-bottom: 1px dashed #eee; display: flex; justify-content: space-between;
             align-items: center; gap: 10px; border-radius: 4px;
         }
-        /* 고정된 댓글 스타일 디자인 강조 */
-        .comment-item.comment-pinned {
-            background-color: #fff6e6; border: 1px solid #ffa500; border-dashed: none;
-        }
+        .comment-item.comment-pinned { background-color: #fff6e6; border: 1px solid #ffa500; }
         .comment-item span { word-break: break-all; }
         .comment-item:last-child { border-bottom: none; margin-bottom: 0; }
         
@@ -103,7 +99,7 @@
         .comment-form { display: flex; gap: 8px; margin-top: 10px; }
         .comment-input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
 
-        /* 모달 */
+        /* 모달 설정 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4); z-index: 200; justify-content: center; align-items: center;
@@ -118,9 +114,12 @@
         label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
         input[type="text"], input[type="password"], textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
         .file-upload { border: 2px dashed #ccc; padding: 15px; text-align: center; background: #fafafa; cursor: pointer; border-radius: 6px; font-size: 13px; }
-        #filePreviewArea { margin-top: 10px; font-size: 13px; color: #555; }
-        #filePreviewArea img, #filePreviewArea video { width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; }
+        #fileStatusArea { margin-top: 10px; font-size: 13px; color: #555; font-weight: bold; }
         .no-posts { text-align: center; padding: 50px 0; color: #777; }
+
+        /* 업로드 프로그레스 바 */
+        .progress-bar-container { display: none; width: 100%; background: #eee; height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: #03cf5d; transition: width 0.1s; }
 
         @media (max-width: 600px) {
             .navbar { height: auto; flex-direction: column; align-items: center; padding: 12px 15px; gap: 8px; }
@@ -136,6 +135,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 </head>
 <body>
 
@@ -193,19 +193,22 @@
                 <input type="text" id="title" required>
             </div>
             <div class="form-group">
-                <label>미디어 첨부 (이미지, MP3, MP4, WMV / 최대 50MB)</label>
+                <label>미디어 첨부 (이미지, MP3, MP4, WMV / 최대 180MB 제한)</label>
                 <div class="file-upload" onclick="document.getElementById('fileInput').click()">
                     클릭하여 파일 선택 (사진/동영상/오디오)
                     <input type="file" id="fileInput" accept=".png, .jpg, .jpeg, .mp3, .mp4, .wmv" style="display: none;" onchange="handleFileSelect()">
                 </div>
-                <div id="filePreviewArea"></div>
+                <div id="fileStatusArea"></div>
+                <div class="progress-bar-container" id="uploadProgressContainer">
+                    <div class="progress-bar" id="uploadProgressBar"></div>
+                </div>
             </div>
             <div class="form-group">
                 <label>내용 (최대 2000자)</label>
                 <textarea id="content" rows="8" maxlength="2000" oninput="document.getElementById('charCounter').textContent = this.value.length + ' / 2000자'" required></textarea>
                 <div style="text-align:right; font-size:12px; color:#777;" id="charCounter">0 / 2000자</div>
             </div>
-            <button type="submit" class="btn btn-green" style="width:100%; padding:12px;">발행하기</button>
+            <button type="submit" id="submitBtn" class="btn btn-green" style="width:100%; padding:12px;">발행하기</button>
         </form>
     </div>
 </div>
@@ -215,7 +218,7 @@
         apiKey: "AIzaSyBxFacPLg8J-7y6k87RI7i9IEcD7DO7WH4",
         authDomain: "gonbueuechalin.firebaseapp.com",
         projectId: "gonbueuechalin",
-        storageBucket: "gonbueuechalin.firebasestorage.app",
+        storageBucket: "gonbueuechalin.firebasestorage.app", // 여기에 스토리지 저장됨
         messagingSenderId: "193482426059",
         appId: "1:193482426059:web:19d09767c6bcb502b4fd4e",
         measurementId: "G-H16JSEPYNJ"
@@ -223,10 +226,12 @@
     
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    const storage = firebase.storage(); // 스토리지 시작
 
     let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
-    let uploadedFileBase64 = "";
-    let uploadedFileType = ""; // "image", "audio", "video" 구분용
+    let selectedFile = null;
+    let uploadedFileUrl = "";
+    let uploadedFileType = "";
 
     window.onload = function() {
         initAdminAccount();
@@ -247,8 +252,7 @@
         database.ref('academyUsers').once('value', function(snapshot) {
             let users = snapshot.val();
             if (!users || !Object.values(users).some(u => u.email === 'hak123@gmail.com')) {
-                const newAdminRef = database.ref('academyUsers').push();
-                newAdminRef.set({ email: 'hak123@gmail.com', pw: '1234' });
+                database.ref('academyUsers').push().set({ email: 'hak123@gmail.com', pw: '1234' });
             }
         });
     }
@@ -275,10 +279,13 @@
         document.getElementById(id).style.display = 'none'; 
         if(id === 'writeModal') {
             document.getElementById('blogForm').reset();
-            document.getElementById('filePreviewArea').innerHTML = '';
+            document.getElementById('fileStatusArea').innerHTML = '';
+            document.getElementById('uploadProgressContainer').style.display = 'none';
             document.getElementById('editPostId').value = '';
-            uploadedFileBase64 = "";
+            selectedFile = null;
+            uploadedFileUrl = "";
             uploadedFileType = "";
+            document.getElementById('submitBtn').disabled = false;
         }
     }
 
@@ -295,11 +302,8 @@
 
         database.ref('academyUsers').once('value', function(snapshot) {
             let users = snapshot.val() || {};
-            const isExist = Object.values(users).some(u => u.email === email);
-            if (isExist) { alert("이미 존재하는 아이디입니다."); return; }
-
-            const newUserRef = database.ref('academyUsers').push();
-            newUserRef.set({ email: email, pw: pw }, function(error) {
+            if (Object.values(users).some(u => u.email === email)) { alert("이미 존재하는 아이디입니다."); return; }
+            database.ref('academyUsers').push().set({ email: email, pw: pw }, function(error) {
                 if(!error) { alert("회원가입이 완료되었습니다! 로그인해 주세요."); closeModal('joinModal'); }
             });
         });
@@ -313,7 +317,6 @@
         database.ref('academyUsers').once('value', function(snapshot) {
             let users = snapshot.val() || {};
             const user = Object.values(users).find(u => u.email === email && u.pw === pw);
-
             if (user) {
                 currentUser = user;
                 sessionStorage.setItem('currentUser', JSON.stringify(user));
@@ -331,20 +334,20 @@
         updateNavbar();
     }
 
-    // 🛠️ 파일 선택 검사 및 50MB 용량 제한
+    // 🛠️ 파일 선택 검사 및 180MB 용량 제한
     function handleFileSelect() {
-        const preview = document.getElementById('filePreviewArea');
+        const statusArea = document.getElementById('fileStatusArea');
         const file = document.getElementById('fileInput').files[0];
-        preview.innerHTML = '';
-        uploadedFileBase64 = "";
+        statusArea.innerHTML = '';
+        selectedFile = null;
         uploadedFileType = "";
 
         if (!file) return;
 
-        // 50MB 용량 제한 검사 (50 * 1024 * 1024 bytes)
-        const maxSize = 50 * 1024 * 1024;
+        // 🟢 180MB 제한 체킹 (180 * 1024 * 1024 bytes)
+        const maxSize = 180 * 1024 * 1024;
         if (file.size > maxSize) {
-            alert("파일 용량이 50MB를 초과했습니다. 더 작은 파일을 선택해주세요!");
+            alert("파일 용량이 180MB를 초과했습니다. 더 작은 파일을 선택해주세요!");
             document.getElementById('fileInput').value = "";
             return;
         }
@@ -354,37 +357,60 @@
         else if (fileName.match(/\.(mp3)$/)) { uploadedFileType = "audio"; }
         else if (fileName.match(/\.(mp4|wmv)$/)) { uploadedFileType = "video"; }
         else {
-            alert("허용되지 않는 파일 형식입니다. (PNG, JPG, JPEG, MP3, MP4, WMV만 가능)");
+            alert("허용되지 않는 파일 형식입니다. (PNG, JPG, JPEG, MP3, MP4, WMV 가능)");
             document.getElementById('fileInput').value = "";
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            uploadedFileBase64 = e.target.result;
-            if (uploadedFileType === "image") {
-                preview.innerHTML = `<img src="${uploadedFileBase64}">`;
-            } else if (uploadedFileType === "video") {
-                preview.innerHTML = `🎥 비디오 선택됨 (${file.name})`;
-            } else if (uploadedFileType === "audio") {
-                preview.innerHTML = `🎵 오디오 선택됨 (${file.name})`;
-            }
-        };
-        reader.readAsDataURL(file);
+        selectedFile = file;
+        statusArea.innerHTML = `📂 선택된 파일: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB) - 업로드 준비 완료`;
     }
 
+    // 🛠️ 저장하기 및 파이어베이스 스토리지 업로드 연동
     function handleSavePost(event) {
         event.preventDefault();
         const title = document.getElementById('title').value;
         const content = document.getElementById('content').value;
         const editId = document.getElementById('editPostId').value;
+        const submitBtn = document.getElementById('submitBtn');
 
+        // 파일이 있다면 스토리지에 먼저 업로드 시작
+        if (selectedFile) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "🔄 파일 업로드 중...";
+            
+            const fileRef = storage.ref().child('academy_media/' + Date.now() + '_' + selectedFile.name);
+            const uploadTask = fileRef.put(selectedFile);
+
+            document.getElementById('uploadProgressContainer').style.display = 'block';
+
+            uploadTask.on('state_changed', 
+                function(snapshot) {
+                    // 진행도 프로그레스 바 연동
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById('uploadProgressBar').style.width = progress + '%';
+                }, 
+                function(error) {
+                    alert("파일 업로드에 실패했습니다. 파이어베이스 스토리지 설정을 확인해보세요!");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "발행하기";
+                }, 
+                function() {
+                    // 업로드 완료 후 URL 다운로드
+                    uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+                        saveToDatabase(editId, title, content, downloadURL, uploadedFileType);
+                    });
+                }
+            );
+        } else {
+            // 새로 첨부한 파일이 없는 경우 기존 데이터 유지 처리
+            saveToDatabase(editId, title, content, uploadedFileUrl, uploadedFileType);
+        }
+    }
+
+    function saveToDatabase(editId, title, content, mediaUrl, mediaType) {
         if (editId) {
-            let updates = { title: title, content: content };
-            if(uploadedFileBase64) {
-                updates.mediaData = uploadedFileBase64;
-                updates.mediaType = uploadedFileType;
-            }
+            let updates = { title: title, content: content, mediaData: mediaUrl, mediaType: mediaType };
             database.ref('academyPosts/' + editId).update(updates, function(error) {
                 if(!error) closeModal('writeModal');
             });
@@ -396,8 +422,8 @@
                 content: content,
                 writer: currentUser.email,
                 date: new Date().toLocaleString('ko-KR'),
-                mediaData: uploadedFileBase64,
-                mediaType: uploadedFileType,
+                mediaData: mediaUrl,
+                mediaType: mediaType,
                 pinned: false,
                 likes: [],
                 comments: []
@@ -419,10 +445,11 @@
             document.getElementById('content').value = post.content;
             document.getElementById('charCounter').textContent = post.content.length + ' / 2000자';
             
-            if (post.mediaData) {
-                const preview = document.getElementById('filePreviewArea');
-                if(post.mediaType === 'image') preview.innerHTML = `<img src="${post.mediaData}">`;
-                else preview.innerHTML = `📁 기존 파일 유지됨 (${post.mediaType})`;
+            uploadedFileUrl = post.mediaData || "";
+            uploadedFileType = post.mediaType || "";
+
+            if (uploadedFileUrl) {
+                document.getElementById('fileStatusArea').innerHTML = `📁 기존 파일이 등록되어 있습니다. (유형: ${uploadedFileType})`;
             }
             openModal('writeModal');
         });
@@ -446,14 +473,12 @@
             if (post) {
                 let likes = post.likes || [];
                 const index = likes.indexOf(currentUser.email);
-                if (index > -1) { likes.splice(index, 1); } 
-                else { likes.push(currentUser.email); }
+                if (index > -1) { likes.splice(index, 1); } else { likes.push(currentUser.email); }
                 database.ref('academyPosts/' + id).update({ likes: likes });
             }
         });
     }
 
-    // 댓글 추가
     function addComment(event, postId) {
         event.preventDefault();
         if (!currentUser) { alert("로그인이 필요합니다."); return; }
@@ -465,11 +490,11 @@
             if (post) {
                 let comments = post.comments || [];
                 comments.push({
-                    id: Date.now() + Math.floor(Math.random() * 1000), // 댓글 고유 ID 부여
+                    id: Date.now() + Math.floor(Math.random() * 1000),
                     writer: currentUser.email,
                     text: input.value,
                     date: new Date().toLocaleDateString(),
-                    pinned: false // 초기 댓글 고정 상태는 해제
+                    pinned: false
                 });
                 database.ref('academyPosts/' + postId).update({ comments: comments });
                 input.value = '';
@@ -477,7 +502,6 @@
         });
     }
 
-    // 🛠️ 댓글 삭제 함수
     function deleteComment(postId, commentId) {
         if(!confirm("이 댓글을 삭제하시겠습니까?")) return;
         database.ref('academyPosts/' + postId + '/comments').once('value', function(snapshot) {
@@ -487,7 +511,6 @@
         });
     }
 
-    // 🛠️ 댓글 고정 토글 함수
     function toggleCommentPin(postId, commentId) {
         database.ref('academyPosts/' + postId + '/comments').once('value', function(snapshot) {
             let comments = snapshot.val() || [];
@@ -518,7 +541,6 @@
             let commentsList = post.comments || [];
             const isLiked = currentUser && likesList.includes(currentUser.email);
 
-            // 🛠️ 댓글 정렬 규칙: 고정된 댓글(pinned: true)이 최상단으로 오도록 배치
             commentsList.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
             const postCard = document.createElement('div');
@@ -535,7 +557,6 @@
                 `;
             }
 
-            // 🛠️ 멀티미디어 타입별 렌더링 코드 처리
             let mediaHtml = '';
             if (post.mediaData) {
                 if (post.mediaType === "image") {
@@ -550,16 +571,12 @@
             let commentsHtml = '';
             commentsList.forEach(c => {
                 const isCommentOwner = currentUser && currentUser.email === c.writer;
-                
-                // 댓글 삭제 버튼 권한 체크 (본인 혹은 원장쌤)
                 let deleteBtnHtml = (isCommentOwner || isAdmin) ? `<button class="comment-btn" style="color:#ff4d4f;" onclick="deleteComment(${post.id}, ${c.id})">×</button>` : '';
                 
-                // 댓글 고정 버튼 권한 체크 (글쓴이 본인 혹은 원장쌤)
                 let pinBtnHtml = '';
                 if (isMyPost || isAdmin) {
                     pinBtnHtml = `<button class="comment-btn ${c.pinned ? 'pin-active' : ''}" onclick="toggleCommentPin(${post.id}, ${c.id})">📌 ${c.pinned ? '해제' : '고정'}</button>`;
                 } else if (c.pinned) {
-                    // 권한은 없지만 이미 고정된 상태라면 아이콘만 띄워줌
                     pinBtnHtml = `<span style="font-size:11px; color:#ffa500;">📌 고정됨</span>`;
                 }
 
