@@ -11,30 +11,34 @@
             margin: 0; padding: 0; color: #333;
         }
 
-        /* 상단 네비게이션 바 */
+        /* 📱 상단 네비게이션 바 (모바일 대응을 위해 flex-wrap 추가 및 height 제거) */
         .navbar {
             background-color: #ffffff;
             border-bottom: 1px solid #e2e6ed;
-            position: fixed; top: 0; width: 100%; height: 60px;
+            position: fixed; top: 0; width: 100%; min-height: 60px;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; box-sizing: border-box; z-index: 100;
+            padding: 10px 20px; box-sizing: border-box; z-index: 100;
+            flex-wrap: wrap; gap: 10px;
         }
 
         .navbar .logo {
             font-size: 20px; font-weight: bold; color: #03cf5d; cursor: pointer;
+            white-space: nowrap;
         }
 
+        /* 우측 버튼 영역도 모바일에서 줄바꿈이 부드럽게 되도록 설정 */
         .nav-right {
-            display: flex; gap: 10px; align-items: center;
+            display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
         }
 
         .user-info {
-            font-size: 14px; color: #555; font-weight: bold;
+            font-size: 14px; color: #555; font-weight: bold; white-space: nowrap;
         }
 
         .btn {
-            border: none; padding: 8px 16px; font-size: 14px; font-weight: bold;
+            border: none; padding: 8px 14px; font-size: 13px; font-weight: bold;
             border-radius: 20px; cursor: pointer; transition: background 0.2s;
+            white-space: nowrap;
         }
 
         .btn-green { background-color: #03cf5d; color: white; }
@@ -42,9 +46,9 @@
         .btn-gray { background-color: #e2e6ed; color: #333; }
         .btn-gray:hover { background-color: #d1d5db; }
 
-        /* 메인 컨테이너 */
+        /* 메인 컨테이너 (상단 바 높이가 유연하므로 padding-top을 늘림) */
         .main-container {
-            max-width: 700px; margin: 80px auto 40px auto; padding: 0 20px;
+            max-width: 700px; margin: 95px auto 40px auto; padding: 0 15px; box-sizing: border-box;
         }
 
         /* 고정된 글 상단 표시용 */
@@ -57,8 +61,9 @@
         /* 블로그 글 카드 */
         .post-card {
             background: #ffffff; border: 1px solid #e2e6ed; border-radius: 8px;
-            padding: 24px; margin-bottom: 20px; position: relative;
+            padding: 20px; margin-bottom: 20px; position: relative;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            word-break: break-all; /* 텍스트가 카드 밖으로 나가는 것 방지 */
         }
 
         /* 고정된 게시글은 테두리 강조 */
@@ -66,7 +71,7 @@
             border: 2px solid #ff4d4f; background-color: #fffbfe;
         }
 
-        .post-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        .post-title { font-size: 19px; font-weight: bold; margin-bottom: 10px; padding-right: 60px; }
         .post-meta { font-size: 12px; color: #999; margin-bottom: 15px; }
         .post-content { font-size: 15px; line-height: 1.6; white-space: pre-wrap; color: #444; }
         
@@ -75,12 +80,12 @@
             border-radius: 6px; border: 1px solid #eee; margin-top: 15px;
         }
 
-        /* 관리자/작성자 제어 버튼들 */
+        /* 관리자/작성자 제어 버튼들 (모바일에서 겹치지 않게 위치 미세 조정) */
         .post-controls {
-            position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;
+            position: absolute; top: 15px; right: 15px; display: flex; gap: 8px;
         }
         .control-sub-btn {
-            background: none; border: none; font-size: 12px; color: #888; cursor: pointer;
+            background: none; border: none; font-size: 11px; color: #888; cursor: pointer; padding: 0;
         }
         .control-sub-btn:hover { text-decoration: underline; color: #333; }
 
@@ -98,14 +103,16 @@
 
         /* 댓글 구역 */
         .comment-section {
-            margin-top: 15px; background: #fafafa; padding: 15px; border-radius: 6px;
+            margin-top: 15px; background: #fafafa; padding: 12px; border-radius: 6px;
         }
         .comment-item {
             font-size: 13px; margin-bottom: 8px; padding-bottom: 8px;
             border-bottom: 1px dashed #eee; display: flex; justify-content: space-between;
+            gap: 10px;
         }
+        .comment-item span { word-break: break-all; }
         .comment-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .comment-form { display: flex; gap: 10px; margin-top: 10px; }
+        .comment-form { display: flex; gap: 8px; margin-top: 10px; }
         .comment-input {
             flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;
         }
@@ -114,10 +121,11 @@
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4); z-index: 200; justify-content: center; align-items: center;
+            padding: 15px; box-sizing: border-box;
         }
         .modal-content {
             background: white; width: 100%; max-width: 500px; border-radius: 12px;
-            padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; position: relative;
+            padding: 20px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; position: relative;
         }
         .modal-close {
             position: absolute; top: 15px; right: 20px; font-size: 24px; border: none; background: none; cursor: pointer; color: #999;
@@ -130,6 +138,17 @@
         .file-upload { border: 2px dashed #ccc; padding: 15px; text-align: center; background: #fafafa; cursor: pointer; border-radius: 6px; font-size: 13px; }
         #imagePreview img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; margin-top: 10px; }
         .no-posts { text-align: center; padding: 50px 0; color: #777; }
+
+        /* 📱 스마트폰 전용 초소형 화면 최적화 스타일 추가 */
+        @media (max-width: 480px) {
+            .navbar { padding: 10px 15px; }
+            .navbar .logo { font-size: 18px; }
+            .user-info { font-size: 12px; }
+            .btn { padding: 6px 12px; font-size: 12px; }
+            .main-container { margin-top: 110px; } /* 줄바꿈 시 본문이 가려지지 않게 여백 추가 */
+            .post-title { font-size: 17px; padding-right: 0; margin-top: 25px; } /* 관리 버튼과 안 겹치게 */
+            .post-controls { top: 10px; right: 10px; }
+        }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -229,7 +248,7 @@
     let uploadedImageBase64 = "";
 
     window.onload = function() {
-        initAdminAccount(); // 🛠️ 페이지 열릴 때 관리자 계정 체크 및 생성 함수 실행
+        initAdminAccount();
         updateNavbar();
         
         // 파이어베이스 실시간 데이터 동기화
@@ -244,12 +263,10 @@
         });
     };
 
-    // 🛠️ 버그 수정: 파이어베이스 서버에 관리자 계정이 없거나 비어있을 때 무조건 생성되도록 보완
+    // 관리자 계정 체크 및 생성 함수
     function initAdminAccount() {
         database.ref('academyUsers').once('value', function(snapshot) {
             let users = snapshot.val();
-            
-            // 서버가 완전히 비어있거나 관리자 계정이 목록에 없는 경우 생성
             if (!users || !Object.values(users).some(u => u.email === 'hak123@gmail.com')) {
                 const newAdminRef = database.ref('academyUsers').push();
                 newAdminRef.set({ email: 'hak123@gmail.com', pw: '1234' });
@@ -510,7 +527,7 @@
             if (isMyPost || isAdmin) {
                 controlsHtml = `
                     <div class="post-controls">
-                        <button class="control-sub-btn" onclick="togglePin(${post.id})">${post.pinned ? '📌 고정해제' : '📌 상단고정'}</button>
+                        <button class="control-sub-btn" onclick="togglePin(${post.id})">${post.pinned ? '📌 고정' : '📌 고정'}</button>
                         <button class="control-sub-btn" onclick="editPost(${post.id})">수정</button>
                         <button class="control-sub-btn" onclick="deletePost(${post.id})">삭제</button>
                     </div>
