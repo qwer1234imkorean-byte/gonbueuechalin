@@ -209,7 +209,7 @@
 </div>
 
 <script>
-    // 🟢 제공해주신 파이어베이스 인증키 정보가 반영되었습니다!
+    // 🟢 파이어베이스 인증키 정보
     const firebaseConfig = {
         apiKey: "AIzaSyBxFacPLg8J-7y6k87RI7i9IEcD7DO7WH4",
         authDomain: "gonbueuechalin.firebaseapp.com",
@@ -224,43 +224,40 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // 상태 관리 변수 (세션스토리지에 현재 로그인 정보 저장)
+    // 상태 관리 변수
     let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
     let uploadedImageBase64 = "";
 
-    // 윈도우 로드 시 실행 (관리자 계정 세팅 및 서버 실시간 연동)
     window.onload = function() {
-        initAdminAccount();
+        initAdminAccount(); // 🛠️ 페이지 열릴 때 관리자 계정 체크 및 생성 함수 실행
         updateNavbar();
         
-        // 🔄 파이어베이스 서버 실시간 감시/동기화 활성화
+        // 파이어베이스 실시간 데이터 동기화
         database.ref('academyPosts').on('value', function(snapshot) {
             const data = snapshot.val();
             let postsArray = [];
             if (data) {
-                // 객체 형태를 배열 형태로 변환
                 postsArray = Object.keys(data).map(key => data[key]);
-                // 최신순 정렬 (id가 타임스탬프이므로 큰 숫자가 위로)
                 postsArray.sort((a, b) => b.id - a.id);
             }
             displayPosts(postsArray);
         });
     };
 
-    // 학원 관리자 계정이 서버에 없으면 자동 생성
+    // 🛠️ 버그 수정: 파이어베이스 서버에 관리자 계정이 없거나 비어있을 때 무조건 생성되도록 보완
     function initAdminAccount() {
         database.ref('academyUsers').once('value', function(snapshot) {
-            let users = snapshot.val() || {};
-            const hasAdmin = Object.values(users).some(u => u.email === 'hak123@gmail.com');
+            let users = snapshot.val();
             
-            if (!hasAdmin) {
+            // 서버가 완전히 비어있거나 관리자 계정이 목록에 없는 경우 생성
+            if (!users || !Object.values(users).some(u => u.email === 'hak123@gmail.com')) {
                 const newAdminRef = database.ref('academyUsers').push();
                 newAdminRef.set({ email: 'hak123@gmail.com', pw: '1234' });
             }
         });
     }
 
-    // 로그인 여부에 따른 네비게이션 상단바 업데이트
+    // 네비게이션바 업데이트
     function updateNavbar() {
         const authArea = document.getElementById('navAuthArea');
         if (currentUser) {
@@ -278,7 +275,6 @@
         }
     }
 
-    // 모달 제어
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { 
         document.getElementById(id).style.display = 'none'; 
@@ -299,7 +295,7 @@
         openModal('writeModal');
     }
 
-    // 회원가입 처리 (서버 연동)
+    // 회원가입
     function handleJoin(event) {
         event.preventDefault();
         const email = document.getElementById('joinEmail').value;
@@ -324,7 +320,7 @@
         });
     }
 
-    // 로그인 처리 (서버 연동)
+    // 로그인
     function handleLogin(event) {
         event.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -354,7 +350,7 @@
         updateNavbar();
     }
 
-    // 이미지 업로드 파일 체크 및 Base64 변환
+    // 이미지 프리뷰
     function previewImages() {
         const preview = document.getElementById('imagePreview');
         const file = document.getElementById('imageInput').files[0];
@@ -378,7 +374,7 @@
         }
     }
 
-    // 글 저장 및 수정 처리 (서버 연동)
+    // 글 저장 및 수정
     function handleSavePost(event) {
         event.preventDefault();
         const title = document.getElementById('title').value;
@@ -386,19 +382,12 @@
         const editId = document.getElementById('editPostId').value;
 
         if (editId) {
-            // 수정 모드
-            let updates = {
-                title: title,
-                content: content
-            };
-            if(uploadedImageBase64) {
-                updates.image = uploadedImageBase64;
-            }
+            let updates = { title: title, content: content };
+            if(uploadedImageBase64) { updates.image = uploadedImageBase64; }
             database.ref('academyPosts/' + editId).update(updates, function(error) {
                 if(!error) closeModal('writeModal');
             });
         } else {
-            // 새 글 추가 모드
             const postId = Date.now();
             const newPost = {
                 id: postId,
@@ -417,7 +406,7 @@
         }
     }
 
-    // 글 수정 열기 (서버 연동)
+    // 글 수정 폼 채우기
     function editPost(id) {
         database.ref('academyPosts/' + id).once('value', function(snapshot) {
             const post = snapshot.val();
@@ -437,26 +426,24 @@
         });
     }
 
-    // 글 삭제 (서버 연동)
+    // 글 삭제
     function deletePost(id) {
         if(confirm("정말로 이 글을 삭제하시겠습니까?")) {
             database.ref('academyPosts/' + id).remove();
         }
     }
 
-    // 상단 고정 / 해제 처리 (서버 연동)
+    // 공지 고정 토글
     function togglePin(id) {
         database.ref('academyPosts/' + id).once('value', function(snapshot) {
             const post = snapshot.val();
             if(post) {
-                database.ref('academyPosts/' + id).update({
-                    pinned: !post.pinned
-                });
+                database.ref('academyPosts/' + id).update({ pinned: !post.pinned });
             }
         });
     }
 
-    // 좋아요(하트) 기능 (서버 연동)
+    // 좋아요 토글
     function toggleLike(id) {
         if (!currentUser) { alert("로그인이 필요합니다."); return; }
         
@@ -466,17 +453,14 @@
                 let likes = post.likes || [];
                 const index = likes.indexOf(currentUser.email);
                 
-                if (index > -1) {
-                    likes.splice(index, 1);
-                } else {
-                    likes.push(currentUser.email);
-                }
+                if (index > -1) { likes.splice(index, 1); } 
+                else { likes.push(currentUser.email); }
                 database.ref('academyPosts/' + id).update({ likes: likes });
             }
         });
     }
 
-    // 댓글 등록 기능 (서버 연동)
+    // 댓글 추가
     function addComment(event, postId) {
         event.preventDefault();
         if (!currentUser) { alert("로그인이 필요합니다."); return; }
@@ -499,7 +483,7 @@
         });
     }
 
-    // 전체 글 화면에 출력
+    // 화면 포스트 출력
     function displayPosts(posts) {
         const container = document.getElementById('postContainer');
         container.innerHTML = '';
