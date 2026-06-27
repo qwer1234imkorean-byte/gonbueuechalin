@@ -14,7 +14,7 @@
         .navbar {
             background-color: #ffffff;
             border-bottom: 1px solid #e2e6ed;
-            position: fixed; top: 0; left: 0; width: 100%; height: 65px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 20px; box-sizing: border-box; z-index: 100;
         }
@@ -38,7 +38,7 @@
         .btn-gray:hover { background-color: #d1d5db; }
 
         .main-container {
-            max-width: 700px; margin: 90px auto 40px auto; padding: 0 15px; box-sizing: border-box;
+            max-width: 700px; margin: 100px auto 40px auto; padding: 0 15px; box-sizing: border-box;
         }
 
         .pinned-badge {
@@ -54,11 +54,10 @@
         }
         .post-card.pinned { border: 2px solid #ff4d4f; background-color: #fffbfe; }
 
-        .post-title { font-size: 19px; font-weight: bold; margin-bottom: 10px; padding-right: 60px; }
+        .post-title { font-size: 19px; font-weight: bold; margin-bottom: 10px; padding-right: 80px; }
         .post-meta { font-size: 12px; color: #999; margin-bottom: 15px; }
         .post-content { font-size: 15px; line-height: 1.6; white-space: pre-wrap; color: #444; }
         
-        /* 미디어 레이아웃 최적화 */
         .post-media { margin-top: 15px; text-align: center; }
         .post-media img, .post-media video {
             width: 100%; max-height: 450px; object-fit: contain;
@@ -80,7 +79,6 @@
         }
         .action-item.liked { color: #ff4d4f; font-weight: bold; }
 
-        /* 댓글 스타일 */
         .comment-section { margin-top: 15px; background: #fafafa; padding: 12px; border-radius: 6px; }
         .comment-item {
             font-size: 13px; margin-bottom: 8px; padding: 6px 8px;
@@ -99,7 +97,6 @@
         .comment-form { display: flex; gap: 8px; margin-top: 10px; }
         .comment-input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
 
-        /* 모달 설정 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4); z-index: 200; justify-content: center; align-items: center;
@@ -117,25 +114,21 @@
         #fileStatusArea { margin-top: 10px; font-size: 13px; color: #555; font-weight: bold; }
         .no-posts { text-align: center; padding: 50px 0; color: #777; }
 
-        /* 업로드 프로그레스 바 */
-        .progress-bar-container { display: none; width: 100%; background: #eee; height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
-        .progress-bar { width: 0%; height: 100%; background: #03cf5d; transition: width 0.1s; }
-
+        /* 모바일 상단 바 깨짐 수정 및 레이아웃 최적화 */
         @media (max-width: 600px) {
-            .navbar { height: auto; flex-direction: column; align-items: center; padding: 12px 15px; gap: 8px; }
-            .navbar .logo { font-size: 18px; margin-bottom: 2px; }
+            .navbar { height: auto; flex-direction: column; align-items: center; padding: 10px 15px; gap: 8px; }
+            .navbar .logo { font-size: 18px; }
             .nav-right { width: 100%; justify-content: center; gap: 6px; }
             .user-info { font-size: 12px; margin-right: 4px; }
             .btn { padding: 6px 12px; font-size: 12px; border-radius: 15px; }
-            .main-container { margin-top: 120px; }
+            .main-container { margin-top: 140px; }
             .post-title { font-size: 17px; padding-right: 0; margin-top: 25px; }
-            .post-controls { top: 12px; right: 12px; }
+            .post-controls { top: 10px; right: 10px; }
         }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 </head>
 <body>
 
@@ -193,15 +186,12 @@
                 <input type="text" id="title" required>
             </div>
             <div class="form-group">
-                <label>미디어 첨부 (이미지, MP3, MP4, WMV / 최대 180MB 제한)</label>
+                <label>미디어 첨부 (이미지, MP3, MP4, WMV / 최대 180MB)</label>
                 <div class="file-upload" onclick="document.getElementById('fileInput').click()">
                     클릭하여 파일 선택 (사진/동영상/오디오)
                     <input type="file" id="fileInput" accept=".png, .jpg, .jpeg, .mp3, .mp4, .wmv" style="display: none;" onchange="handleFileSelect()">
                 </div>
                 <div id="fileStatusArea"></div>
-                <div class="progress-bar-container" id="uploadProgressContainer">
-                    <div class="progress-bar" id="uploadProgressBar"></div>
-                </div>
             </div>
             <div class="form-group">
                 <label>내용 (최대 2000자)</label>
@@ -218,15 +208,11 @@
         apiKey: "AIzaSyBxFacPLg8J-7y6k87RI7i9IEcD7DO7WH4",
         authDomain: "gonbueuechalin.firebaseapp.com",
         projectId: "gonbueuechalin",
-        storageBucket: "gonbueuechalin.firebasestorage.app", // 여기에 스토리지 저장됨
-        messagingSenderId: "193482426059",
-        appId: "1:193482426059:web:19d09767c6bcb502b4fd4e",
-        measurementId: "G-H16JSEPYNJ"
+        databaseURL: "https://gonbueuechalin-default-rtdb.firebaseio.com/"
     };
     
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const storage = firebase.storage(); // 스토리지 시작
 
     let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
     let selectedFile = null;
@@ -280,12 +266,12 @@
         if(id === 'writeModal') {
             document.getElementById('blogForm').reset();
             document.getElementById('fileStatusArea').innerHTML = '';
-            document.getElementById('uploadProgressContainer').style.display = 'none';
             document.getElementById('editPostId').value = '';
             selectedFile = null;
             uploadedFileUrl = "";
             uploadedFileType = "";
             document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').textContent = "발행하기";
         }
     }
 
@@ -334,7 +320,6 @@
         updateNavbar();
     }
 
-    // 🛠️ 파일 선택 검사 및 180MB 용량 제한
     function handleFileSelect() {
         const statusArea = document.getElementById('fileStatusArea');
         const file = document.getElementById('fileInput').files[0];
@@ -344,8 +329,7 @@
 
         if (!file) return;
 
-        // 🟢 180MB 제한 체킹 (180 * 1024 * 1024 bytes)
-        const maxSize = 180 * 1024 * 1024;
+        const maxSize = 180 * 1024 * 1024; // 180MB 제한
         if (file.size > maxSize) {
             alert("파일 용량이 180MB를 초과했습니다. 더 작은 파일을 선택해주세요!");
             document.getElementById('fileInput').value = "";
@@ -366,7 +350,7 @@
         statusArea.innerHTML = `📂 선택된 파일: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB) - 업로드 준비 완료`;
     }
 
-    // 🛠️ 저장하기 및 파이어베이스 스토리지 업로드 연동
+    // 외부 무료 고속 파일 서버 시스템 연동 (무료 요금제 한계 극복)
     function handleSavePost(event) {
         event.preventDefault();
         const title = document.getElementById('title').value;
@@ -374,36 +358,35 @@
         const editId = document.getElementById('editPostId').value;
         const submitBtn = document.getElementById('submitBtn');
 
-        // 파일이 있다면 스토리지에 먼저 업로드 시작
         if (selectedFile) {
             submitBtn.disabled = true;
-            submitBtn.textContent = "🔄 파일 업로드 중...";
-            
-            const fileRef = storage.ref().child('academy_media/' + Date.now() + '_' + selectedFile.name);
-            const uploadTask = fileRef.put(selectedFile);
+            submitBtn.textContent = "🔄 고속 서버 파일 업로드 중 (최대 1분 소요)...";
 
-            document.getElementById('uploadProgressContainer').style.display = 'block';
+            const formData = new FormData();
+            formData.append('file', selectedFile);
 
-            uploadTask.on('state_changed', 
-                function(snapshot) {
-                    // 진행도 프로그레스 바 연동
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    document.getElementById('uploadProgressBar').style.width = progress + '%';
-                }, 
-                function(error) {
-                    alert("파일 업로드에 실패했습니다. 파이어베이스 스토리지 설정을 확인해보세요!");
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "발행하기";
-                }, 
-                function() {
-                    // 업로드 완료 후 URL 다운로드
-                    uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-                        saveToDatabase(editId, title, content, downloadURL, uploadedFileType);
-                    });
+            // 무료 대용량 임시 파일 스토리지 API 활용
+            fetch('https://tmpfiles.org/api/v1/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data && data.data && data.data.url) {
+                    // 다운로드 가능한 다이렉트 주소로 포맷 변환
+                    let rawUrl = data.data.url;
+                    let directUrl = rawUrl.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                    saveToDatabase(editId, title, content, directUrl, uploadedFileType);
+                } else {
+                    throw new Error('업로드 실패');
                 }
-            );
+            })
+            .catch(err => {
+                alert("파일 업로드 서버 통신에 실패했습니다. 다시 시도해 주세요.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "발행하기";
+            });
         } else {
-            // 새로 첨부한 파일이 없는 경우 기존 데이터 유지 처리
             saveToDatabase(editId, title, content, uploadedFileUrl, uploadedFileType);
         }
     }
@@ -449,7 +432,7 @@
             uploadedFileType = post.mediaType || "";
 
             if (uploadedFileUrl) {
-                document.getElementById('fileStatusArea').innerHTML = `📁 기존 파일이 등록되어 있습니다. (유형: ${uploadedFileType})`;
+                document.getElementById('fileStatusArea').innerHTML = `📁 기존 파일 유지됨 (유형: ${uploadedFileType})`;
             }
             openModal('writeModal');
         });
@@ -562,7 +545,7 @@
                 if (post.mediaType === "image") {
                     mediaHtml = `<div class="post-media"><img src="${post.mediaData}"></div>`;
                 } else if (post.mediaType === "video") {
-                    mediaHtml = `<div class="post-media"><video src="${post.mediaData}" controls></video></div>`;
+                    mediaHtml = `<div class="post-media"><video src="${post.mediaData}" controls preload="metadata"></video></div>`;
                 } else if (post.mediaType === "audio") {
                     mediaHtml = `<div class="post-media"><audio src="${post.mediaData}" controls></audio></div>`;
                 }
