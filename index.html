@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>공부의철인 학원 커뮤니티 블로그</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body {
             font-family: 'Malgun Gothic', sans-serif;
@@ -133,6 +131,9 @@
         #imagePreview img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; margin-top: 10px; }
         .no-posts { text-align: center; padding: 50px 0; color: #777; }
     </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
@@ -208,40 +209,58 @@
 </div>
 
 <script>
-    // 유저가 보내준 Firebase 설정 값 입력
+    // 🟢 제공해주신 파이어베이스 인증키 정보가 반영되었습니다!
     const firebaseConfig = {
         apiKey: "AIzaSyBxFacPLg8J-7y6k87RI7i9IEcD7DO7WH4",
         authDomain: "gonbueuechalin.firebaseapp.com",
-        databaseURL: "https://gonbueuechalin-default-rtdb.firebaseio.com",
         projectId: "gonbueuechalin",
         storageBucket: "gonbueuechalin.firebasestorage.app",
         messagingSenderId: "193482426059",
         appId: "1:193482426059:web:19d09767c6bcb502b4fd4e",
         measurementId: "G-H16JSEPYNJ"
     };
-
-    // Firebase 초기화
+    
+    // 파이어베이스 시작하기
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // 로그인 상태 유지를 위한 세션 스토리지 활용
+    // 상태 관리 변수 (세션스토리지에 현재 로그인 정보 저장)
     let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
     let uploadedImageBase64 = "";
 
+    // 윈도우 로드 시 실행 (관리자 계정 세팅 및 서버 실시간 연동)
     window.onload = function() {
         initAdminAccount();
         updateNavbar();
-        listenToPosts(); // 실시간 데이터 변화 감지 실행
+        
+        // 🔄 파이어베이스 서버 실시간 감시/동기화 활성화
+        database.ref('academyPosts').on('value', function(snapshot) {
+            const data = snapshot.val();
+            let postsArray = [];
+            if (data) {
+                // 객체 형태를 배열 형태로 변환
+                postsArray = Object.keys(data).map(key => data[key]);
+                // 최신순 정렬 (id가 타임스탬프이므로 큰 숫자가 위로)
+                postsArray.sort((a, b) => b.id - a.id);
+            }
+            displayPosts(postsArray);
+        });
     };
 
-    // 관리자 계정이 서버에 없으면 강제 등록
+    // 학원 관리자 계정이 서버에 없으면 자동 생성
     function initAdminAccount() {
-        database.ref('users/hak123_gmail_com').set({
-            email: 'hak123@gmail.com',
-            pw: '1234'
+        database.ref('academyUsers').once('value', function(snapshot) {
+            let users = snapshot.val() || {};
+            const hasAdmin = Object.values(users).some(u => u.email === 'hak123@gmail.com');
+            
+            if (!hasAdmin) {
+                const newAdminRef = database.ref('academyUsers').push();
+                newAdminRef.set({ email: 'hak123@gmail.com', pw: '1234' });
+            }
         });
     }
 
+    // 로그인 여부에 따른 네비게이션 상단바 업데이트
     function updateNavbar() {
         const authArea = document.getElementById('navAuthArea');
         if (currentUser) {
@@ -259,6 +278,7 @@
         }
     }
 
+    // 모달 제어
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { 
         document.getElementById(id).style.display = 'none'; 
@@ -271,70 +291,78 @@
     }
 
     function openWriteModal() {
-        if (!currentUser) { alert("로그인한 회원만 글을 쓸 수 있습니다!"); return; }
+        if (!currentUser) {
+            alert("로그인한 회원만 글을 쓸 수 있습니다!");
+            return;
+        }
         document.getElementById('modalTitle').textContent = "✏️ 새 글 쓰기";
         openModal('writeModal');
     }
 
-    // 이메일을 Firebase 경로로 사용할 수 있게 변환해 주는 함수 (.을 _로 변경)
-    function escapeEmail(email) { return email.replace(/\./g, '_'); }
-
-    // 회원가입
+    // 회원가입 처리 (서버 연동)
     function handleJoin(event) {
         event.preventDefault();
         const email = document.getElementById('joinEmail').value;
         const pw = document.getElementById('joinPw').value;
-        const escaped = escapeEmail(email);
 
-        database.ref('users/' + escaped).once('value').then(snapshot => {
-            if (snapshot.exists()) {
+        database.ref('academyUsers').once('value', function(snapshot) {
+            let users = snapshot.val() || {};
+            const isExist = Object.values(users).some(u => u.email === email);
+            
+            if (isExist) {
                 alert("이미 존재하는 아이디입니다.");
-            } else {
-                database.ref('users/' + escaped).set({ email, pw }).then(() => {
-                    alert("회원가입 완료! 로그인해 주세요.");
-                    closeModal('joinModal');
-                });
+                return;
             }
+
+            const newUserRef = database.ref('academyUsers').push();
+            newUserRef.set({ email: email, pw: pw }, function(error) {
+                if(!error) {
+                    alert("회원가입이 완료되었습니다! 로그인해 주세요.");
+                    closeModal('joinModal');
+                }
+            });
         });
     }
 
-    // 로그인
+    // 로그인 처리 (서버 연동)
     function handleLogin(event) {
         event.preventDefault();
         const email = document.getElementById('loginEmail').value;
         const pw = document.getElementById('loginPw').value;
-        const escaped = escapeEmail(email);
 
-        database.ref('users/' + escaped).once('value').then(snapshot => {
-            const user = snapshot.val();
-            if (user && user.pw === pw) {
+        database.ref('academyUsers').once('value', function(snapshot) {
+            let users = snapshot.val() || {};
+            const user = Object.values(users).find(u => u.email === email && u.pw === pw);
+
+            if (user) {
                 currentUser = user;
                 sessionStorage.setItem('currentUser', JSON.stringify(user));
                 alert(email === 'hak123@gmail.com' ? "원장선생님 환영합니다!" : "로그인 성공!");
                 closeModal('loginModal');
                 updateNavbar();
-                displayPosts();
             } else {
                 alert("아이디 또는 비밀번호가 틀렸습니다.");
             }
         });
     }
 
+    // 로그아웃
     function handleLogout() {
         currentUser = null;
         sessionStorage.removeItem('currentUser');
         alert("로그아웃 되었습니다.");
         updateNavbar();
-        displayPosts();
     }
 
+    // 이미지 업로드 파일 체크 및 Base64 변환
     function previewImages() {
         const preview = document.getElementById('imagePreview');
         const file = document.getElementById('imageInput').files[0];
         preview.innerHTML = '';
 
         if (file) {
-            if(["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+            const fileType = file.type;
+            if(fileType === "image/png" || fileType === "image/jpeg" || fileType === "image/jpg") {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = document.createElement('img');
@@ -344,13 +372,13 @@
                 }
                 reader.readAsDataURL(file);
             } else {
-                alert("PNG, JPG, JPEG 이미지 파일만 가능합니다.");
+                alert("PNG, JPG, JPEG 이미지 파일만 업로드할 수 있습니다.");
                 document.getElementById('imageInput').value = "";
             }
         }
     }
 
-    // 구글 파이어베이스 서버 창고에 게시글 저장 및 수정
+    // 글 저장 및 수정 처리 (서버 연동)
     function handleSavePost(event) {
         event.preventDefault();
         const title = document.getElementById('title').value;
@@ -359,118 +387,137 @@
 
         if (editId) {
             // 수정 모드
-            let updateData = { title, content };
-            if(uploadedImageBase64) updateData.image = uploadedImageBase64;
-            database.ref('posts/' + editId).update(updateData).then(() => closeModal('writeModal'));
+            let updates = {
+                title: title,
+                content: content
+            };
+            if(uploadedImageBase64) {
+                updates.image = uploadedImageBase64;
+            }
+            database.ref('academyPosts/' + editId).update(updates, function(error) {
+                if(!error) closeModal('writeModal');
+            });
         } else {
-            // 새 글 쓰기 모드
-            const newPostId = Date.now().toString();
+            // 새 글 추가 모드
+            const postId = Date.now();
             const newPost = {
-                id: newPostId,
+                id: postId,
                 title: title,
                 content: content,
                 writer: currentUser.email,
                 date: new Date().toLocaleString('ko-KR'),
                 image: uploadedImageBase64,
-                pinned: false
+                pinned: false,
+                likes: [],
+                comments: []
             };
-            database.ref('posts/' + newPostId).set(newPost).then(() => closeModal('writeModal'));
+            database.ref('academyPosts/' + postId).set(newPost, function(error) {
+                if(!error) closeModal('writeModal');
+            });
         }
     }
 
+    // 글 수정 열기 (서버 연동)
     function editPost(id) {
-        database.ref('posts/' + id).once('value').then(snapshot => {
+        database.ref('academyPosts/' + id).once('value', function(snapshot) {
             const post = snapshot.val();
             if(!post) return;
+
             document.getElementById('modalTitle').textContent = "✏️ 글 수정하기";
             document.getElementById('editPostId').value = post.id;
             document.getElementById('title').value = post.title;
             document.getElementById('content').value = post.content;
-            if (post.image) document.getElementById('imagePreview').innerHTML = `<img src="${post.image}">`;
+            document.getElementById('charCounter').textContent = post.content.length + ' / 2000자';
+            
+            if (post.image) {
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = `<img src="${post.image}">`;
+            }
             openModal('writeModal');
         });
     }
 
+    // 글 삭제 (서버 연동)
     function deletePost(id) {
         if(confirm("정말로 이 글을 삭제하시겠습니까?")) {
-            database.ref('posts/' + id).remove();
+            database.ref('academyPosts/' + id).remove();
         }
     }
 
+    // 상단 고정 / 해제 처리 (서버 연동)
     function togglePin(id) {
-        database.ref('posts/' + id + '/pinned').once('value').then(snapshot => {
-            const currentPinned = snapshot.val() || false;
-            database.ref('posts/' + id).update({ pinned: !currentPinned });
-        });
-    }
-
-    // 하트 토글 (유저 이메일 해싱 경로로 개별 기록)
-    function toggleLike(id) {
-        if (!currentUser) { alert("로그인이 필요합니다."); return; }
-        const escapedEmail = escapeEmail(currentUser.email);
-        const likeRef = database.ref(`posts/${id}/likes/${escapedEmail}`);
-
-        likeRef.once('value').then(snapshot => {
-            if(snapshot.exists()) {
-                likeRef.remove();
-            } else {
-                likeRef.set(currentUser.email);
+        database.ref('academyPosts/' + id).once('value', function(snapshot) {
+            const post = snapshot.val();
+            if(post) {
+                database.ref('academyPosts/' + id).update({
+                    pinned: !post.pinned
+                });
             }
         });
     }
 
-    // 댓글 등록
+    // 좋아요(하트) 기능 (서버 연동)
+    function toggleLike(id) {
+        if (!currentUser) { alert("로그인이 필요합니다."); return; }
+        
+        database.ref('academyPosts/' + id).once('value', function(snapshot) {
+            const post = snapshot.val();
+            if (post) {
+                let likes = post.likes || [];
+                const index = likes.indexOf(currentUser.email);
+                
+                if (index > -1) {
+                    likes.splice(index, 1);
+                } else {
+                    likes.push(currentUser.email);
+                }
+                database.ref('academyPosts/' + id).update({ likes: likes });
+            }
+        });
+    }
+
+    // 댓글 등록 기능 (서버 연동)
     function addComment(event, postId) {
         event.preventDefault();
         if (!currentUser) { alert("로그인이 필요합니다."); return; }
+        
         const input = document.getElementById(`commentInput-${postId}`);
         if (!input.value.trim()) return;
 
-        const commentId = Date.now().toString();
-        database.ref(`posts/${postId}/comments/${commentId}`).set({
-            writer: currentUser.email,
-            text: input.value,
-            date: new Date().toLocaleDateString()
-        }).then(() => { input.value = ''; });
-    }
-
-    // 파이어베이스 데이터베이스 실시간 동기화 감지기
-    let globalPosts = [];
-    function listenToPosts() {
-        database.ref('posts').on('value', snapshot => {
-            const data = snapshot.val();
-            globalPosts = [];
-            if(data) {
-                Object.keys(data).forEach(key => {
-                    let post = data[key];
-                    // 객체형태 데이터를 배열형태로 변환 전처리
-                    post.likes = post.likes ? Object.values(post.likes) : [];
-                    post.comments = post.comments ? Object.values(post.comments) : [];
-                    globalPosts.push(post);
+        database.ref('academyPosts/' + postId).once('value', function(snapshot) {
+            const post = snapshot.val();
+            if (post) {
+                let comments = post.comments || [];
+                comments.push({
+                    writer: currentUser.email,
+                    text: input.value,
+                    date: new Date().toLocaleDateString()
                 });
+                database.ref('academyPosts/' + postId).update({ comments: comments });
+                input.value = '';
             }
-            displayPosts();
         });
     }
 
-    // 화면 렌더링 그리기
-    function displayPosts() {
+    // 전체 글 화면에 출력
+    function displayPosts(posts) {
         const container = document.getElementById('postContainer');
         container.innerHTML = '';
 
-        if (globalPosts.length === 0) {
-            container.innerHTML = '<div class="no-posts">📢 등록된 블로그 글이 없습니다.<br>로그인 후 전세계에 첫 소식을 남겨보세요!</div>';
+        if (!posts || posts.length === 0) {
+            container.innerHTML = '<div class="no-posts">📢 등록된 블로그 글이 없습니다.<br>로그인 후 첫 소식을 남겨보세요!</div>';
             return;
         }
 
-        // 최신순 정렬 후, 고정글(pinned) 상단 정렬
-        globalPosts.sort((a, b) => b.id - a.id);
-        globalPosts.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+        posts.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
-        globalPosts.forEach(post => {
+        posts.forEach(post => {
             const isMyPost = currentUser && currentUser.email === post.writer;
             const isAdmin = currentUser && currentUser.email === 'hak123@gmail.com';
-            const isLiked = currentUser && post.likes.includes(currentUser.email);
+            
+            const likesList = post.likes || [];
+            const commentsList = post.comments || [];
+            const isLiked = currentUser && likesList.includes(currentUser.email);
 
             const postCard = document.createElement('div');
             postCard.className = `post-card ${post.pinned ? 'pinned' : ''}`;
@@ -479,9 +526,9 @@
             if (isMyPost || isAdmin) {
                 controlsHtml = `
                     <div class="post-controls">
-                        <button class="control-sub-btn" onclick="togglePin('${post.id}')">${post.pinned ? '📌 고정해제' : '📌 상단고정'}</button>
-                        <button class="control-sub-btn" onclick="editPost('${post.id}')">수정</button>
-                        <button class="control-sub-btn" onclick="deletePost('${post.id}')">삭제</button>
+                        <button class="control-sub-btn" onclick="togglePin(${post.id})">${post.pinned ? '📌 고정해제' : '📌 상단고정'}</button>
+                        <button class="control-sub-btn" onclick="editPost(${post.id})">수정</button>
+                        <button class="control-sub-btn" onclick="deletePost(${post.id})">삭제</button>
                     </div>
                 `;
             }
@@ -489,7 +536,7 @@
             let imageHtml = post.image ? `<div class="post-images"><img src="${post.image}"></div>` : '';
 
             let commentsHtml = '';
-            post.comments.forEach(c => {
+            commentsList.forEach(c => {
                 commentsHtml += `
                     <div class="comment-item">
                         <span><strong>${c.writer === 'hak123@gmail.com' ? '👑원장쌤' : c.writer}</strong>: ${c.text}</span>
@@ -507,16 +554,16 @@
                 ${imageHtml}
                 
                 <div class="post-actions">
-                    <button class="action-item ${isLiked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
-                        ${isLiked ? '❤️' : '🤍'} 좋아요 ${post.likes.length}
+                    <button class="action-item ${isLiked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                        ${isLiked ? '❤️' : '🤍'} 좋아요 ${likesList.length}
                     </button>
-                    <div class="action-item">💬 댓글 ${post.comments.length}</div>
+                    <div class="action-item">💬 댓글 ${commentsList.length}</div>
                 </div>
 
                 <div class="comment-section">
                     <div id="commentList-${post.id}">${commentsHtml}</div>
                     ${currentUser ? `
-                        <form class="comment-form" onsubmit="addComment(event, '${post.id}')">
+                        <form class="comment-form" onsubmit="addComment(event, ${post.id})">
                             <input type="text" class="comment-input" id="commentInput-${post.id}" placeholder="댓글을 입력하세요...">
                             <button type="submit" class="btn btn-green" style="padding: 4px 12px; font-size: 12px; border-radius:4px;">등록</button>
                         </form>
