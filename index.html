@@ -11,7 +11,6 @@
             margin: 0; padding: 0; color: #333;
         }
 
-        /* 🟢 PC용 기본 상단 네비게이션 바 스타일 */
         .navbar {
             background-color: #ffffff;
             border-bottom: 1px solid #e2e6ed;
@@ -25,73 +24,56 @@
             white-space: nowrap;
         }
 
-        .nav-right {
-            display: flex; gap: 10px; align-items: center;
-        }
-
-        .user-info {
-            font-size: 14px; color: #555; font-weight: bold; white-space: nowrap;
-        }
+        .nav-right { display: flex; gap: 10px; align-items: center; }
+        .user-info { font-size: 14px; color: #555; font-weight: bold; white-space: nowrap; }
 
         .btn {
             border: none; padding: 8px 16px; font-size: 14px; font-weight: bold;
             border-radius: 20px; cursor: pointer; transition: background 0.2s;
             white-space: nowrap; display: inline-block;
         }
-
         .btn-green { background-color: #03cf5d; color: white; }
         .btn-green:hover { background-color: #02b34f; }
         .btn-gray { background-color: #e2e6ed; color: #333; }
         .btn-gray:hover { background-color: #d1d5db; }
 
-        /* 🟢 메인 컨테이너 (PC 기본 상단 여백) */
         .main-container {
             max-width: 700px; margin: 90px auto 40px auto; padding: 0 15px; box-sizing: border-box;
         }
 
-        /* 고정된 글 상단 표시용 */
         .pinned-badge {
             background-color: #ff4d4f; color: white; padding: 2px 8px;
             border-radius: 4px; font-size: 12px; font-weight: bold;
             display: inline-block; margin-bottom: 8px;
         }
 
-        /* 블로그 글 카드 */
         .post-card {
             background: #ffffff; border: 1px solid #e2e6ed; border-radius: 8px;
             padding: 20px; margin-bottom: 20px; position: relative;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            word-break: break-all;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); word-break: break-all;
         }
-
-        .post-card.pinned {
-            border: 2px solid #ff4d4f; background-color: #fffbfe;
-        }
+        .post-card.pinned { border: 2px solid #ff4d4f; background-color: #fffbfe; }
 
         .post-title { font-size: 19px; font-weight: bold; margin-bottom: 10px; padding-right: 60px; }
         .post-meta { font-size: 12px; color: #999; margin-bottom: 15px; }
         .post-content { font-size: 15px; line-height: 1.6; white-space: pre-wrap; color: #444; }
         
-        .post-images img {
-            width: 100%; max-height: 350px; object-fit: cover;
-            border-radius: 6px; border: 1px solid #eee; margin-top: 15px;
+        /* 미디어 출력 스타일 */
+        .post-media { margin-top: 15px; }
+        .post-media img, .post-media video {
+            width: 100%; max-height: 400px; object-fit: contain;
+            border-radius: 6px; border: 1px solid #eee; background: #000;
         }
+        .post-media audio { width: 100%; margin-top: 5px; }
 
-        /* 제어 버튼들 */
-        .post-controls {
-            position: absolute; top: 15px; right: 15px; display: flex; gap: 8px;
-        }
-        .control-sub-btn {
-            background: none; border: none; font-size: 11px; color: #888; cursor: pointer; padding: 0;
-        }
+        .post-controls { position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; }
+        .control-sub-btn { background: none; border: none; font-size: 11px; color: #888; cursor: pointer; padding: 0; }
         .control-sub-btn:hover { text-decoration: underline; color: #333; }
 
-        /* 하트 & 댓글 카운터 구역 */
         .post-actions {
             margin-top: 20px; padding-top: 15px; border-top: 1px solid #f2f4f7;
             display: flex; gap: 20px;
         }
-
         .action-item {
             display: flex; align-items: center; gap: 6px; font-size: 14px;
             color: #666; cursor: pointer; background: none; border: none;
@@ -99,22 +81,29 @@
         .action-item.liked { color: #ff4d4f; font-weight: bold; }
 
         /* 댓글 구역 */
-        .comment-section {
-            margin-top: 15px; background: #fafafa; padding: 12px; border-radius: 6px;
-        }
+        .comment-section { margin-top: 15px; background: #fafafa; padding: 12px; border-radius: 6px; }
+        
         .comment-item {
-            font-size: 13px; margin-bottom: 8px; padding-bottom: 8px;
+            font-size: 13px; margin-bottom: 8px; padding: 6px 8px;
             border-bottom: 1px dashed #eee; display: flex; justify-content: space-between;
-            gap: 10px;
+            align-items: center; gap: 10px; border-radius: 4px;
+        }
+        /* 고정된 댓글 스타일 디자인 강조 */
+        .comment-item.comment-pinned {
+            background-color: #fff6e6; border: 1px solid #ffa500; border-dashed: none;
         }
         .comment-item span { word-break: break-all; }
-        .comment-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .comment-form { display: flex; gap: 8px; margin-top: 10px; }
-        .comment-input {
-            flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;
-        }
+        .comment-item:last-child { border-bottom: none; margin-bottom: 0; }
+        
+        .comment-right-controls { display: flex; gap: 8px; align-items: center; }
+        .comment-btn { background: none; border: none; font-size: 11px; cursor: pointer; color: #999; padding: 2px; }
+        .comment-btn:hover { color: #333; }
+        .comment-btn.pin-active { color: #ffa500; font-weight: bold; }
 
-        /* 모달 팝업 공통 */
+        .comment-form { display: flex; gap: 8px; margin-top: 10px; }
+        .comment-input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+
+        /* 모달 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4); z-index: 200; justify-content: center; align-items: center;
@@ -124,69 +113,27 @@
             background: white; width: 100%; max-width: 500px; border-radius: 12px;
             padding: 20px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; position: relative;
         }
-        .modal-close {
-            position: absolute; top: 15px; right: 20px; font-size: 24px; border: none; background: none; cursor: pointer; color: #999;
-        }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 24px; border: none; background: none; cursor: pointer; color: #999; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
-        input[type="text"], input[type="password"], textarea {
-            width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;
-        }
+        input[type="text"], input[type="password"], textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
         .file-upload { border: 2px dashed #ccc; padding: 15px; text-align: center; background: #fafafa; cursor: pointer; border-radius: 6px; font-size: 13px; }
-        #imagePreview img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; margin-top: 10px; }
+        #filePreviewArea { margin-top: 10px; font-size: 13px; color: #555; }
+        #filePreviewArea img, #filePreviewArea video { width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; }
         .no-posts { text-align: center; padding: 50px 0; color: #777; }
 
-        /* 📱 스마트폰 모바일 화면 완벽 조절 (미디어 쿼리) */
         @media (max-width: 600px) {
-            .navbar {
-                height: auto; /* 고정 높이 해제 */
-                flex-direction: column; /* 세로로 배치하여 겹침 차단 */
-                align-items: center;
-                padding: 12px 15px;
-                gap: 8px;
-            }
-            
-            .navbar .logo {
-                font-size: 18px;
-                margin-bottom: 2px;
-            }
-
-            .nav-right {
-                width: 100%;
-                justify-content: center; /* 버튼들을 가운대로 정렬 */
-                gap: 6px;
-            }
-
-            .user-info {
-                font-size: 12px;
-                margin-right: 4px;
-            }
-
-            .btn {
-                padding: 6px 12px;
-                font-size: 12px; /* 글자 크기를 살짝 줄여 공간 확보 */
-                border-radius: 15px;
-            }
-
-            /* 상단 바가 세로로 늘어난 만큼 본문 카드를 아래로 넉넉하게 밀어줌 */
-            .main-container {
-                margin-top: 120px; 
-            }
-
-            .post-title {
-                font-size: 17px;
-                padding-right: 0;
-                margin-top: 25px; /* 본문 타이틀이 상단 고정/수정 버튼에 가려지지 않게 여백 확보 */
-            }
-
-            .post-controls {
-                top: 12px;
-                right: 12px;
-            }
+            .navbar { height: auto; flex-direction: column; align-items: center; padding: 12px 15px; gap: 8px; }
+            .navbar .logo { font-size: 18px; margin-bottom: 2px; }
+            .nav-right { width: 100%; justify-content: center; gap: 6px; }
+            .user-info { font-size: 12px; margin-right: 4px; }
+            .btn { padding: 6px 12px; font-size: 12px; border-radius: 15px; }
+            .main-container { margin-top: 120px; }
+            .post-title { font-size: 17px; padding-right: 0; margin-top: 25px; }
+            .post-controls { top: 12px; right: 12px; }
         }
     </style>
 
-    <!-- 🌐 구글 파이어베이스 라이브러리 추가 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -199,7 +146,6 @@
 
 <div class="main-container" id="postContainer"></div>
 
-<!-- 회원가입 모달 -->
 <div class="modal-overlay" id="joinModal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeModal('joinModal')">&times;</button>
@@ -218,7 +164,6 @@
     </div>
 </div>
 
-<!-- 로그인 모달 -->
 <div class="modal-overlay" id="loginModal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
@@ -237,7 +182,6 @@
     </div>
 </div>
 
-<!-- 글쓰기 모달 -->
 <div class="modal-overlay" id="writeModal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeModal('writeModal')">&times;</button>
@@ -249,12 +193,12 @@
                 <input type="text" id="title" required>
             </div>
             <div class="form-group">
-                <label>이미지 첨부 (PNG, JPG, JPEG)</label>
-                <div class="file-upload" onclick="document.getElementById('imageInput').click()">
-                    클릭하여 이미지 선택
-                    <input type="file" id="imageInput" accept=".png, .jpg, .jpeg" style="display: none;" onchange="previewImages()">
+                <label>미디어 첨부 (이미지, MP3, MP4, WMV / 최대 50MB)</label>
+                <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                    클릭하여 파일 선택 (사진/동영상/오디오)
+                    <input type="file" id="fileInput" accept=".png, .jpg, .jpeg, .mp3, .mp4, .wmv" style="display: none;" onchange="handleFileSelect()">
                 </div>
-                <div id="imagePreview"></div>
+                <div id="filePreviewArea"></div>
             </div>
             <div class="form-group">
                 <label>내용 (최대 2000자)</label>
@@ -281,7 +225,8 @@
     const database = firebase.database();
 
     let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
-    let uploadedImageBase64 = "";
+    let uploadedFileBase64 = "";
+    let uploadedFileType = ""; // "image", "audio", "video" 구분용
 
     window.onload = function() {
         initAdminAccount();
@@ -330,17 +275,15 @@
         document.getElementById(id).style.display = 'none'; 
         if(id === 'writeModal') {
             document.getElementById('blogForm').reset();
-            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('filePreviewArea').innerHTML = '';
             document.getElementById('editPostId').value = '';
-            uploadedImageBase64 = "";
+            uploadedFileBase64 = "";
+            uploadedFileType = "";
         }
     }
 
     function openWriteModal() {
-        if (!currentUser) {
-            alert("로그인한 회원만 글을 쓸 수 있습니다!");
-            return;
-        }
+        if (!currentUser) { alert("로그인한 회원만 글을 쓸 수 있습니다!"); return; }
         document.getElementById('modalTitle').textContent = "✏️ 새 글 쓰기";
         openModal('writeModal');
     }
@@ -357,10 +300,7 @@
 
             const newUserRef = database.ref('academyUsers').push();
             newUserRef.set({ email: email, pw: pw }, function(error) {
-                if(!error) {
-                    alert("회원가입이 완료되었습니다! 로그인해 주세요.");
-                    closeModal('joinModal');
-                }
+                if(!error) { alert("회원가입이 완료되었습니다! 로그인해 주세요."); closeModal('joinModal'); }
             });
         });
     }
@@ -380,9 +320,7 @@
                 alert(email === 'hak123@gmail.com' ? "원장선생님 환영합니다!" : "로그인 성공!");
                 closeModal('loginModal');
                 updateNavbar();
-            } else {
-                alert("아이디 또는 비밀번호가 틀렸습니다.");
-            }
+            } else { alert("아이디 또는 비밀번호가 틀렸습니다."); }
         });
     }
 
@@ -393,27 +331,46 @@
         updateNavbar();
     }
 
-    function previewImages() {
-        const preview = document.getElementById('imagePreview');
-        const file = document.getElementById('imageInput').files[0];
+    // 🛠️ 파일 선택 검사 및 50MB 용량 제한
+    function handleFileSelect() {
+        const preview = document.getElementById('filePreviewArea');
+        const file = document.getElementById('fileInput').files[0];
         preview.innerHTML = '';
+        uploadedFileBase64 = "";
+        uploadedFileType = "";
 
-        if (file) {
-            const fileType = file.type;
-            if(fileType === "image/png" || fileType === "image/jpeg" || fileType === "image/jpg") {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    preview.appendChild(img);
-                    uploadedImageBase64 = e.target.result;
-                }
-                reader.readAsDataURL(file);
-            } else {
-                alert("PNG, JPG, JPEG 이미지 파일만 업로드할 수 있습니다.");
-                document.getElementById('imageInput').value = "";
-            }
+        if (!file) return;
+
+        // 50MB 용량 제한 검사 (50 * 1024 * 1024 bytes)
+        const maxSize = 50 * 1024 * 1024;
+        if (file.size > maxSize) {
+            alert("파일 용량이 50MB를 초과했습니다. 더 작은 파일을 선택해주세요!");
+            document.getElementById('fileInput').value = "";
+            return;
         }
+
+        const fileName = file.name.toLowerCase();
+        if (fileName.match(/\.(png|jpg|jpeg)$/)) { uploadedFileType = "image"; }
+        else if (fileName.match(/\.(mp3)$/)) { uploadedFileType = "audio"; }
+        else if (fileName.match(/\.(mp4|wmv)$/)) { uploadedFileType = "video"; }
+        else {
+            alert("허용되지 않는 파일 형식입니다. (PNG, JPG, JPEG, MP3, MP4, WMV만 가능)");
+            document.getElementById('fileInput').value = "";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            uploadedFileBase64 = e.target.result;
+            if (uploadedFileType === "image") {
+                preview.innerHTML = `<img src="${uploadedFileBase64}">`;
+            } else if (uploadedFileType === "video") {
+                preview.innerHTML = `🎥 비디오 선택됨 (${file.name})`;
+            } else if (uploadedFileType === "audio") {
+                preview.innerHTML = `🎵 오디오 선택됨 (${file.name})`;
+            }
+        };
+        reader.readAsDataURL(file);
     }
 
     function handleSavePost(event) {
@@ -424,7 +381,10 @@
 
         if (editId) {
             let updates = { title: title, content: content };
-            if(uploadedImageBase64) { updates.image = uploadedImageBase64; }
+            if(uploadedFileBase64) {
+                updates.mediaData = uploadedFileBase64;
+                updates.mediaType = uploadedFileType;
+            }
             database.ref('academyPosts/' + editId).update(updates, function(error) {
                 if(!error) closeModal('writeModal');
             });
@@ -436,7 +396,8 @@
                 content: content,
                 writer: currentUser.email,
                 date: new Date().toLocaleString('ko-KR'),
-                image: uploadedImageBase64,
+                mediaData: uploadedFileBase64,
+                mediaType: uploadedFileType,
                 pinned: false,
                 likes: [],
                 comments: []
@@ -457,17 +418,18 @@
             document.getElementById('title').value = post.title;
             document.getElementById('content').value = post.content;
             document.getElementById('charCounter').textContent = post.content.length + ' / 2000자';
-            if (post.image) {
-                document.getElementById('imagePreview').innerHTML = `<img src="${post.image}">`;
+            
+            if (post.mediaData) {
+                const preview = document.getElementById('filePreviewArea');
+                if(post.mediaType === 'image') preview.innerHTML = `<img src="${post.mediaData}">`;
+                else preview.innerHTML = `📁 기존 파일 유지됨 (${post.mediaType})`;
             }
             openModal('writeModal');
         });
     }
 
     function deletePost(id) {
-        if(confirm("정말로 이 글을 삭제하시겠습니까?")) {
-            database.ref('academyPosts/' + id).remove();
-        }
+        if(confirm("정말로 이 글을 삭제하시겠습니까?")) { database.ref('academyPosts/' + id).remove(); }
     }
 
     function togglePin(id) {
@@ -491,6 +453,7 @@
         });
     }
 
+    // 댓글 추가
     function addComment(event, postId) {
         event.preventDefault();
         if (!currentUser) { alert("로그인이 필요합니다."); return; }
@@ -502,13 +465,37 @@
             if (post) {
                 let comments = post.comments || [];
                 comments.push({
+                    id: Date.now() + Math.floor(Math.random() * 1000), // 댓글 고유 ID 부여
                     writer: currentUser.email,
                     text: input.value,
-                    date: new Date().toLocaleDateString()
+                    date: new Date().toLocaleDateString(),
+                    pinned: false // 초기 댓글 고정 상태는 해제
                 });
                 database.ref('academyPosts/' + postId).update({ comments: comments });
                 input.value = '';
             }
+        });
+    }
+
+    // 🛠️ 댓글 삭제 함수
+    function deleteComment(postId, commentId) {
+        if(!confirm("이 댓글을 삭제하시겠습니까?")) return;
+        database.ref('academyPosts/' + postId + '/comments').once('value', function(snapshot) {
+            let comments = snapshot.val() || [];
+            comments = comments.filter(c => c.id !== commentId);
+            database.ref('academyPosts/' + postId).update({ comments: comments });
+        });
+    }
+
+    // 🛠️ 댓글 고정 토글 함수
+    function toggleCommentPin(postId, commentId) {
+        database.ref('academyPosts/' + postId + '/comments').once('value', function(snapshot) {
+            let comments = snapshot.val() || [];
+            comments = comments.map(c => {
+                if (c.id === commentId) { c.pinned = !c.pinned; }
+                return c;
+            });
+            database.ref('academyPosts/' + postId).update({ comments: comments });
         });
     }
 
@@ -528,8 +515,11 @@
             const isAdmin = currentUser && currentUser.email === 'hak123@gmail.com';
             
             const likesList = post.likes || [];
-            const commentsList = post.comments || [];
+            let commentsList = post.comments || [];
             const isLiked = currentUser && likesList.includes(currentUser.email);
+
+            // 🛠️ 댓글 정렬 규칙: 고정된 댓글(pinned: true)이 최상단으로 오도록 배치
+            commentsList.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
             const postCard = document.createElement('div');
             postCard.className = `post-card ${post.pinned ? 'pinned' : ''}`;
@@ -545,14 +535,42 @@
                 `;
             }
 
-            let imageHtml = post.image ? `<div class="post-images"><img src="${post.image}"></div>` : '';
+            // 🛠️ 멀티미디어 타입별 렌더링 코드 처리
+            let mediaHtml = '';
+            if (post.mediaData) {
+                if (post.mediaType === "image") {
+                    mediaHtml = `<div class="post-media"><img src="${post.mediaData}"></div>`;
+                } else if (post.mediaType === "video") {
+                    mediaHtml = `<div class="post-media"><video src="${post.mediaData}" controls></video></div>`;
+                } else if (post.mediaType === "audio") {
+                    mediaHtml = `<div class="post-media"><audio src="${post.mediaData}" controls></audio></div>`;
+                }
+            }
 
             let commentsHtml = '';
             commentsList.forEach(c => {
+                const isCommentOwner = currentUser && currentUser.email === c.writer;
+                
+                // 댓글 삭제 버튼 권한 체크 (본인 혹은 원장쌤)
+                let deleteBtnHtml = (isCommentOwner || isAdmin) ? `<button class="comment-btn" style="color:#ff4d4f;" onclick="deleteComment(${post.id}, ${c.id})">×</button>` : '';
+                
+                // 댓글 고정 버튼 권한 체크 (글쓴이 본인 혹은 원장쌤)
+                let pinBtnHtml = '';
+                if (isMyPost || isAdmin) {
+                    pinBtnHtml = `<button class="comment-btn ${c.pinned ? 'pin-active' : ''}" onclick="toggleCommentPin(${post.id}, ${c.id})">📌 ${c.pinned ? '해제' : '고정'}</button>`;
+                } else if (c.pinned) {
+                    // 권한은 없지만 이미 고정된 상태라면 아이콘만 띄워줌
+                    pinBtnHtml = `<span style="font-size:11px; color:#ffa500;">📌 고정됨</span>`;
+                }
+
                 commentsHtml += `
-                    <div class="comment-item">
+                    <div class="comment-item ${c.pinned ? 'comment-pinned' : ''}">
                         <span><strong>${c.writer === 'hak123@gmail.com' ? '👑원장쌤' : c.writer}</strong>: ${c.text}</span>
-                        <span style="color:#aaa; font-size:11px;">${c.date}</span>
+                        <div class="comment-right-controls">
+                            <span style="color:#aaa; font-size:11px;">${c.date}</span>
+                            ${pinBtnHtml}
+                            ${deleteBtnHtml}
+                        </div>
                     </div>
                 `;
             });
@@ -563,7 +581,7 @@
                 <div class="post-title">${post.title}</div>
                 <div class="post-meta">작성자: ${post.writer === 'hak123@gmail.com' ? '👑원장선생님' : post.writer} | ${post.date}</div>
                 <div class="post-content">${post.content}</div>
-                ${imageHtml}
+                ${mediaHtml}
                 
                 <div class="post-actions">
                     <button class="action-item ${isLiked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
